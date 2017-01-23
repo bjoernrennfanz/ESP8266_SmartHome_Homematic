@@ -1,3 +1,6 @@
+*.b#*
 *.s#*
 *.l#*
 *.lck
+.metadata
+*.o

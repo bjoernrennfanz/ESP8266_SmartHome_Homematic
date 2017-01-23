@@ -1,6 +1,6 @@
 [submodule "Firmware/Libraries/NewAskSin"]
 	path = Firmware/Libraries/NewAskSin
 	url = https://github.com/bjoernrennfanz/NewAskSin_ESP8266.git
-[submodule "Firmware/Libraries/ProtoThreads"]
-	path = Firmware/Libraries/ProtoThreads
-	url = https://github.com/bjoernrennfanz/Protothreads.git
+[submodule "Firmware/Libraries/ContikiCore"]
+	path = Firmware/Libraries/ContikiCore
+	url = https://github.com/bjoernrennfanz/ContikiCore_ESP8266.git

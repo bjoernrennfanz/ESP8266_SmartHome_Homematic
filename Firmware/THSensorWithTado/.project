@@ -3,8 +3,8 @@
 	<name>THSensorWithTado</name>
 	<comment></comment>
 	<projects>
+		<project>ContikiCore</project>
 		<project>NewAskSin</project>
-		<project>ProtoThreads</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
