@@ -11,17 +11,17 @@ CXX := $(XTENSA_TOOLS_ROOT)/xtensa-lx106-elf-gcc
 LD  := $(XTENSA_TOOLS_ROOT)/xtensa-lx106-elf-gcc
 
 # compiler flags using during compilation of source files
-CFLAGS = -I. -I../Libraries/ContikiCore -mlongcalls
+CFLAGS = -I. -I../Libraries/ContikiCore -mlongcalls -DICACHE_FLASH -Os
 LDLIBS = -nostdlib -L../Libraries/ContikiCore
 LDLIBS += -Wl,--start-group -lmain -lnet80211 -lwpa -llwip -lpp -lphy -Wl,--end-group
-LDLIBS += -lcontikicore -lgcc -lc
+LDLIBS += -lcontikicore -lc -lgcc
 LDFLAGS = -Teagle.app.v6.ld
 
 # library name
 PROG = thsensorwithtado
 
 # list of source code files
-OBJ = main.o
+OBJS = main.o
 
 %.o: %.c
 	@echo "CC	$<"
@@ -31,9 +31,9 @@ OBJ = main.o
 	@echo "CXX	$<"
 	@$(CC) -c $(CFLAGS) $< -o $@
 	    
-$(PROG) : $(OBJ)
+$(PROG) : $(OBJS)
 	@echo "LD	$@"
-	@$(CC) $(CFLAGS) $(OBJS) -o $@ $(LDFLAGS) $(LDLIBS)
+	$(CC) $(CFLAGS) $(OBJS) -o $@ $(LDFLAGS) $(LDLIBS)
 
 all: $(PROG)
 
