@@ -4,3 +4,5 @@
 *.lck
 .metadata
 *.o
+Firmware/THSensorWithTado/build/
+Firmware/THSensorWithTado/firmware/

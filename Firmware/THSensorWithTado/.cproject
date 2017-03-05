@@ -28,8 +28,12 @@
 									<listOptionValue builtIn="false" value="&quot;${ESP8266_SDK_ROOT}/xtensa-lx106-elf/xtensa-lx106-elf/sysroot/usr/include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${ESP8266_SDK_ROOT}/xtensa-lx106-elf/xtensa-lx106-elf/include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${ESP8266_SDK_ROOT}/xtensa-lx106-elf/lib/gcc/xtensa-lx106-elf/4.8.5/include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${ESP8266_RTOS_SDK_ROOT}/include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${ESP8266_RTOS_SDK_ROOT}/core/include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${ESP8266_RTOS_SDK_ROOT}/extras&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${ESP8266_RTOS_SDK_ROOT}/FreeRTOS/Source/include&quot;"/>
 								</option>
-								<option id="gnu.c.compiler.option.preprocessor.def.symbols.1751691403" superClass="gnu.c.compiler.option.preprocessor.def.symbols" valueType="definedSymbols">
+								<option id="gnu.c.compiler.option.preprocessor.def.symbols.1751691403" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="ICACHE_FLASH"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1235070810" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
@@ -43,8 +47,12 @@
 									<listOptionValue builtIn="false" value="&quot;${ESP8266_SDK_ROOT}/xtensa-lx106-elf/xtensa-lx106-elf/sysroot/usr/include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${ESP8266_SDK_ROOT}/xtensa-lx106-elf/xtensa-lx106-elf/include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${ESP8266_SDK_ROOT}/xtensa-lx106-elf/lib/gcc/xtensa-lx106-elf/4.8.5/include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${ESP8266_RTOS_SDK_ROOT}/include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${ESP8266_RTOS_SDK_ROOT}/core/include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${ESP8266_RTOS_SDK_ROOT}/extras&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${ESP8266_RTOS_SDK_ROOT}/FreeRTOS/Source/include&quot;"/>
 								</option>
-								<option id="gnu.cpp.compiler.option.preprocessor.def.1374796651" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
+								<option id="gnu.cpp.compiler.option.preprocessor.def.1374796651" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="ICACHE_FLASH"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.514244399" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
@@ -64,9 +72,7 @@
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.cross.archiver.1298719415" name="Cross GCC Archiver" superClass="cdt.managedbuild.tool.gnu.cross.archiver"/>
 							<tool id="cdt.managedbuild.tool.gnu.cross.assembler.733103176" name="Cross GCC Assembler" superClass="cdt.managedbuild.tool.gnu.cross.assembler">
-								<option id="gnu.both.asm.option.include.paths.2085736610" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/NewAskSin}&quot;"/>
-								</option>
+								<option id="gnu.both.asm.option.include.paths.2085736610" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths" valueType="includePath"/>
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.1937047311" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 							</tool>
 						</toolChain>
@@ -112,14 +118,17 @@
 								<option defaultValue="gnu.c.optimization.level.most" id="gnu.c.compiler.option.optimization.level.760692866" name="Optimization Level" superClass="gnu.c.compiler.option.optimization.level" useByScannerDiscovery="false" valueType="enumerated"/>
 								<option id="gnu.c.compiler.option.debugging.level.1282674451" name="Debug Level" superClass="gnu.c.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.c.debugging.level.none" valueType="enumerated"/>
 								<option id="gnu.c.compiler.option.include.paths.1322494088" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ContikiCore}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/NewAskSin}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${ESP8266_SDK_ROOT}/xtensa-lx106-elf/include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${ESP8266_SDK_ROOT}/xtensa-lx106-elf/xtensa-lx106-elf/sysroot/usr/include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${ESP8266_SDK_ROOT}/xtensa-lx106-elf/xtensa-lx106-elf/include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${ESP8266_SDK_ROOT}/xtensa-lx106-elf/lib/gcc/xtensa-lx106-elf/4.8.5/include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${ESP8266_RTOS_SDK_ROOT}/include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${ESP8266_RTOS_SDK_ROOT}/core/include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${ESP8266_RTOS_SDK_ROOT}/extras&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${ESP8266_RTOS_SDK_ROOT}/FreeRTOS/Source/include&quot;"/>
 								</option>
-								<option id="gnu.c.compiler.option.preprocessor.def.symbols.195311287" superClass="gnu.c.compiler.option.preprocessor.def.symbols" valueType="definedSymbols">
+								<option id="gnu.c.compiler.option.preprocessor.def.symbols.195311287" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="ICACHE_FLASH"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1917502247" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
@@ -128,14 +137,17 @@
 								<option id="gnu.cpp.compiler.option.optimization.level.1275518516" name="Optimization Level" superClass="gnu.cpp.compiler.option.optimization.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.optimization.level.most" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.option.debugging.level.132266583" name="Debug Level" superClass="gnu.cpp.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.debugging.level.none" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.option.include.paths.885412052" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ContikiCore}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/NewAskSin}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${ESP8266_SDK_ROOT}/xtensa-lx106-elf/include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${ESP8266_SDK_ROOT}/xtensa-lx106-elf/xtensa-lx106-elf/sysroot/usr/include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${ESP8266_SDK_ROOT}/xtensa-lx106-elf/xtensa-lx106-elf/include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${ESP8266_SDK_ROOT}/xtensa-lx106-elf/lib/gcc/xtensa-lx106-elf/4.8.5/include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${ESP8266_RTOS_SDK_ROOT}/include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${ESP8266_RTOS_SDK_ROOT}/core/include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${ESP8266_RTOS_SDK_ROOT}/extras&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${ESP8266_RTOS_SDK_ROOT}/FreeRTOS/Source/include&quot;"/>
 								</option>
-								<option id="gnu.cpp.compiler.option.preprocessor.def.2019132674" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
+								<option id="gnu.cpp.compiler.option.preprocessor.def.2019132674" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="ICACHE_FLASH"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.664344711" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
@@ -155,7 +167,7 @@
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.cross.archiver.797948040" name="Cross GCC Archiver" superClass="cdt.managedbuild.tool.gnu.cross.archiver"/>
 							<tool id="cdt.managedbuild.tool.gnu.cross.assembler.672324522" name="Cross GCC Assembler" superClass="cdt.managedbuild.tool.gnu.cross.assembler">
-								<option id="gnu.both.asm.option.include.paths.658541101" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths"/>
+								<option id="gnu.both.asm.option.include.paths.658541101" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths" valueType="includePath"/>
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.880416656" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 							</tool>
 						</toolChain>
