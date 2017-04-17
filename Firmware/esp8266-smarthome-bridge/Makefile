@@ -20,11 +20,10 @@ CXX := $(XTENSA_TOOLS_ROOT)/xtensa-lx106-elf-gcc
 LD  := $(XTENSA_TOOLS_ROOT)/xtensa-lx106-elf-gcc
 
 # program name
-PROGRAM = thsensorwithtado
+PROGRAM = esp8266-smarthome-bridge
 
 # additional components
 EXTRA_COMPONENTS = \
-	../Libraries/NewAskSin \
 	extras/dht
 
 include $(ESP8266_RTOS_SDK_PATH)/common.mk

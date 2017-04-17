@@ -1,3 +1,0 @@
-[submodule "Firmware/Libraries/NewAskSin"]
-	path = Firmware/Libraries/NewAskSin
-	url = https://github.com/bjoernrennfanz/NewAskSin_ESP8266.git

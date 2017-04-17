@@ -11,6 +11,7 @@
 
 #include "dht_poll_task.h"
 
+
 void dhtProceedValuesTask(void *pvParameters)
 {
 	// Create struct for received values
@@ -36,6 +37,7 @@ void dhtProceedValuesTask(void *pvParameters)
 void user_init(void)
 {
     uart_set_baud(0, 115200);
-    xTaskCreate(dhtMeasurementTask, "dhtMeasurementTask", 256, NULL, 2, NULL);
-    xTaskCreate(dhtProceedValuesTask, "dhtProceedValuesTask", 256, NULL, 2, NULL);
+    xTaskCreate(dhtMeasurementTask, "dhtMeasurementTask", 192, NULL, 2, NULL);
+
+    xTaskCreate(dhtProceedValuesTask, "dhtProceedValuesTask", 192, NULL, 2, NULL);
 }

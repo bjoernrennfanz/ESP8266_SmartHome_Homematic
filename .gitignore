@@ -4,5 +4,5 @@
 *.lck
 .metadata
 *.o
-Firmware/THSensorWithTado/build/
-Firmware/THSensorWithTado/firmware/
+Firmware/esp8266-smarthome-bridge/build/
+Firmware/esp8266-smarthome-bridge/firmware/
