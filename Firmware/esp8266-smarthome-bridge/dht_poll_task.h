@@ -2,7 +2,8 @@
  * dht_poll_task.h
  *
  *  Created on: 04.03.2017
- *      Author: bjoer
+ *      Author: Björn Rennfanz <bjoern@fam-rennfanz.de>
+ *      License: MIT, see LICENSE file for more details.
  */
 
 #ifndef DHT_POLL_TASK_H_

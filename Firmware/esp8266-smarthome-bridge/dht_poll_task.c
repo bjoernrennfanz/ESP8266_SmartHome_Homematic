@@ -1,3 +1,11 @@
+/*
+ * dht_poll_task.c
+ *
+ *  Created on: 04.03.2017
+ *      Author: Björn Rennfanz <bjoern@fam-rennfanz.de>
+ *      License: MIT, see LICENSE file for more details.
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 

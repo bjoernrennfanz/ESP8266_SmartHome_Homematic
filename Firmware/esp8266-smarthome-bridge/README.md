@@ -24,13 +24,18 @@ AT+RESET                              # software reset the unit
 AT+SHOWIP                             # display Station IP Address, gateway and netmask
 AT+SHOWMAC                            # display Station MAC.
 AT+SCAN                               # display available networks around
+```
 
 The avaiable SPI commands are:
 ```
-AT+SPISTART                           # starts the communication via SPI
+AT+SPISTART                           # starts the communication via SPI, enables also chip-select
 AT+SPISEND <byte> <byte> <...>        # sends the data via SPI
-AT+SPIEND                             # ends the communication via SPI
+AT+SPIEND                             # ends the communication via SPI, disables also chip-select
+```
 
 The avaiable DHT commands are:
 ```
 AT+DHTREAD                            # read the current temperature and humidity from DHT sensor
+AT+DHTTYPE                            # print current type of DHT sensor
+AT+DHTTYPE <type>                     # set the type of DHT sensor, type:0=DHT11, 1=DHT22
+```
