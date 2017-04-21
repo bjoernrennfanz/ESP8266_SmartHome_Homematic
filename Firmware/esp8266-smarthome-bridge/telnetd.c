@@ -7,7 +7,6 @@
  */
 
 #include "telnetd.h"
-#include "ringbuffer.h"
 
 #include <lwip/debug.h>
 #include <lwip/stats.h>
@@ -43,7 +42,6 @@
 static uint8_t telnetd_client_txbuffers[TELNETD_MAX_CONN][TELNETD_MAX_BUFFERSIZE];
 static uint8_t telnetd_client_rxbuffers[TELNETD_MAX_CONN][TELNETD_MAX_BUFFERSIZE];
 static struct telnet_client_state telnet_client_states[TELNETD_MAX_CONN];
-static uint8_t telnetd_client_line[TELNETD_MAX_BUFFERSIZE];
 
 /**
  * Find telnet client state from given tcp socket.
@@ -240,28 +238,32 @@ static err_t telnet_recv(void *arg, struct tcp_pcb *pcb, struct pbuf *p, err_t e
 	    }
 
 		// Check if we can consume characters
-		if (ringBuffer_GetFree(&tcs->rxFifo) > p->len)
+		if ((TELNETD_MAX_BUFFERSIZE - (tcs->rxbufferlevel + 1)) > p->len)
 		{
 			// Copy data into rxFifo
 			for (uint16_t i = 0; i < p->len; i++)
 			{
 				// Get current character
-				uint8_t *data = (uint8_t *)(p->payload + i);
+				uint8_t *dataSrc = (uint8_t *)(p->payload + i);
+				uint8_t *dataDst = (uint8_t *)(tcs->rxbuffer + tcs->rxbufferlevel);
 
 				// Write data into rxFifo
-				ringBuffer_Write(&tcs->rxFifo, *data);
-				if (*data == 0x0A)
+				*dataDst = *dataSrc;
+				tcs->rxbufferlevel++;
+
+				// Check if line feed was received
+				if (*dataSrc == 0x0A)
 				{
-					// Copy into line buffer
-					uint16_t len = ringBuffer_GetLevel(&tcs->rxFifo);
-					for (uint16_t j = 0; j < len; j++)
-						telnetd_client_line[j] = ringBuffer_Read(&tcs->rxFifo);
+					uint8_t *dataEnd = (uint8_t *)(tcs->rxbuffer + tcs->rxbufferlevel);
 
 					// Append terminating zero
-					telnetd_client_line[len] = '\0';
+					*dataEnd = '\0';
 
 					// Call client callback
-					telnetd_cb(pcb, &telnetd_client_line[0], len);
+					telnetd_cb(pcb, tcs->rxbuffer, tcs->rxbufferlevel);
+
+					// Reset read counter
+					tcs->rxbufferlevel = 0;
 				}
 			}
 
@@ -325,11 +327,12 @@ static err_t telnet_close_or_abort_conn(struct tcp_pcb *pcb, struct telnet_clien
 	if (tcs != NULL)
 	{
 		tcs->pcb = NULL;
+
 		tcs->txbufferlevel = 0;
 		tcs->txbuffersent = 0;
+		tcs->rxbufferlevel = 0;
+
 		tcs->readyToSend = true;
-
-
 		tcs->retries = 0;
 	}
 
@@ -380,6 +383,7 @@ static void telnet_err(void *arg, err_t err)
 		tcs->pcb = NULL;
 		tcs->txbufferlevel = 0;
 		tcs->txbuffersent = 0;
+		tcs->rxbufferlevel = 0;
 		tcs->readyToSend = true;
 		tcs->retries = 0;
 	}
@@ -482,7 +486,6 @@ static err_t telnet_accept(void *arg, struct tcp_pcb *pcb, err_t err)
 	}
 	else
 	{
-		ringBuffer_Init(&telnet_client_states[i].rxFifo, telnetd_client_rxbuffers[i], TELNETD_MAX_BUFFERSIZE);
 		tcs = &telnet_client_states[i];
 		tcs->pcb = pcb;
 	}
@@ -546,6 +549,9 @@ void telnetd_init(uint16_t port)
 		telnet_client_states[i].txbuffer = telnetd_client_txbuffers[i];
 		telnet_client_states[i].txbufferlevel = 0;
 		telnet_client_states[i].txbuffersent = 0;
+
+		telnet_client_states[i].rxbuffer = telnetd_client_rxbuffers[i];
+		telnet_client_states[i].rxbufferlevel = 0;
 
 		telnet_client_states[i].readyToSend = true;
 		telnet_client_states[i].retries = 0;

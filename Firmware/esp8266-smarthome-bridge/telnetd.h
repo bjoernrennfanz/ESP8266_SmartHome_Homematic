@@ -22,7 +22,7 @@
 #define TELNETD_MAX_CONN		5
 
 // Define maximum send buffer len
-#define TELNETD_MAX_BUFFERSIZE 	256
+#define TELNETD_MAX_BUFFERSIZE 	384
 
 // Structure for client connection state
 struct telnet_client_state
@@ -32,9 +32,11 @@ struct telnet_client_state
     uint8_t *txbuffer; // the buffer for the data to send
     uint16_t txbufferlevel; // the count of data in txbuffer
     uint16_t txbuffersent; // the number of sent bytes in txbuffer.
-	bool readyToSend; //true, if txbuffer can send by tcp_send
 
-	ring_buffer_t rxFifo; // the fifo for received data
+    uint8_t *rxbuffer; // the buffer for the data to send
+    uint16_t rxbufferlevel; // the count of data in rxbuffer
+
+    bool readyToSend; //true, if txbuffer can send by tcp_send
 	uint8_t retries;
 };
 
