@@ -24,6 +24,7 @@ PROGRAM = esp8266-smarthome-bridge
 
 # additional components
 EXTRA_COMPONENTS = \
+	drivers \
 	extras/dht
 
 include $(ESP8266_RTOS_SDK_PATH)/common.mk

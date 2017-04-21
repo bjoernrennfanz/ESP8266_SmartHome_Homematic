@@ -16,8 +16,6 @@
 #include <lwip/pbuf.h>
 #include <lwip/tcp.h>
 
-#include "ringbuffer.h"
-
 // Define maximum simultaneous connections
 #define TELNETD_MAX_CONN		5
 
