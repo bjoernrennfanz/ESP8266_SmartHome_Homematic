@@ -7,6 +7,7 @@
  */
 
 #include "telnetd.h"
+#include "ringbuffer.h"
 
 #include <lwip/debug.h>
 #include <lwip/stats.h>
@@ -18,7 +19,7 @@
 #if LWIP_TCP
 
 #ifndef TELNETD_DEBUG
-#define TELNETD_DEBUG           LWIP_DBG_LEVEL_ALL
+#define TELNETD_DEBUG           LWIP_DBG_ON
 #endif
 
 /** Maximum retries before the connection is aborted/closed.
@@ -39,8 +40,10 @@
 /**
  * Connection pool
  */
-static uint8_t telnetd_client_txbuffers[TELNETD_MAX_CONN][TELNETD_MAX_TXBUFFER];
+static uint8_t telnetd_client_txbuffers[TELNETD_MAX_CONN][TELNETD_MAX_BUFFERSIZE];
+static uint8_t telnetd_client_rxbuffers[TELNETD_MAX_CONN][TELNETD_MAX_BUFFERSIZE];
 static struct telnet_client_state telnet_client_states[TELNETD_MAX_CONN];
+static uint8_t telnetd_client_line[TELNETD_MAX_BUFFERSIZE];
 
 /**
  * Find telnet client state from given tcp socket.
@@ -88,18 +91,18 @@ err_t telnetd_client_write(struct tcp_pcb *pcb, const uint8_t *data, uint16_t le
 	}
 
 	// Check if buffer could be copied
-	if (tcs->txbufferlen + len > TELNETD_MAX_TXBUFFER)
+	if (tcs->txbufferlevel + len > TELNETD_MAX_BUFFERSIZE)
 	{
 		LWIP_DEBUGF(HTTPD_DEBUG, ("telnetd_client_write: txbuffer full on telnet_client_state %p\n", tcs));
 		return ERR_MEM;
 	}
 
 	// Copy data into txbuffer
-	memcpy(tcs->txbuffer + tcs->txbufferlen, data, len);
-	tcs->txbufferlen += len;
+	memcpy(tcs->txbuffer + tcs->txbufferlevel, data, len);
+	tcs->txbufferlevel += len;
 
 	// Check if data could be send immediate
-	if (tcs->readytosend)
+	if (tcs->readyToSend)
 	{
 		telnet_send(pcb, tcs);
 	}
@@ -172,16 +175,16 @@ static err_t telnet_write(struct tcp_pcb *pcb, const void* dataPtr, uint16_t *le
 static err_t telnet_send(struct tcp_pcb *pcb, struct telnet_client_state *tcs)
 {
 	LWIP_DEBUGF(TELNETD_DEBUG | LWIP_DBG_TRACE, ("telnet_send: pcb=%p tcs=%p txbufferleft=%d\n",
-		(void*)pcb, (void*)tcs, tcs != NULL ? (int)(tcs->txbufferlen - tcs->txbuffersent) : 0));
+		(void*)pcb, (void*)tcs, tcs != NULL ? (int)(tcs->txbufferlevel - tcs->txbuffersent) : 0));
 
 	uint16_t len, mss;
-	uint16_t left = tcs->txbufferlen - tcs->txbuffersent;
+	uint16_t left = tcs->txbufferlevel - tcs->txbuffersent;
 	err_t err = ERR_OK;
 
 	/* Check if data to send is available. */
-	if (tcs->txbufferlen != 0)
+	if (tcs->txbufferlevel != 0)
 	{
-		tcs->readytosend = false;
+		tcs->readyToSend = false;
 
 		/* We cannot send more data than space available in the send buffer. */
 		if (tcp_sndbuf(pcb) < left)
@@ -208,9 +211,9 @@ static err_t telnet_send(struct tcp_pcb *pcb, struct telnet_client_state *tcs)
 		}
 
 		/* Check if all data where send out */
-		if (tcs->txbufferlen == tcs->txbuffersent)
+		if (tcs->txbufferlevel == tcs->txbuffersent)
 		{
-			tcs->txbufferlen = 0;
+			tcs->txbufferlevel = 0;
 			tcs->txbuffersent = 0;
 		}
 	}
@@ -236,8 +239,36 @@ static err_t telnet_recv(void *arg, struct tcp_pcb *pcb, struct pbuf *p, err_t e
 			return ERR_BUF;
 	    }
 
-	    tcp_recved(pcb, p->tot_len);
-	    telnetd_cb(pcb, (uint8_t *)p->payload, p->len);
+		// Check if we can consume characters
+		if (ringBuffer_GetFree(&tcs->rxFifo) > p->len)
+		{
+			// Copy data into rxFifo
+			for (uint16_t i = 0; i < p->len; i++)
+			{
+				// Get current character
+				uint8_t *data = (uint8_t *)(p->payload + i);
+
+				// Write data into rxFifo
+				ringBuffer_Write(&tcs->rxFifo, *data);
+				if (*data == 0x0A)
+				{
+					// Copy into line buffer
+					uint16_t len = ringBuffer_GetLevel(&tcs->rxFifo);
+					for (uint16_t j = 0; j < len; j++)
+						telnetd_client_line[j] = ringBuffer_Read(&tcs->rxFifo);
+
+					// Append terminating zero
+					telnetd_client_line[len] = '\0';
+
+					// Call client callback
+					telnetd_cb(pcb, &telnetd_client_line[0], len);
+				}
+			}
+
+			// Notify tcp stack that packet was consumed
+			tcp_recved(pcb, p->tot_len);
+		}
+
 	    if (p != NULL)
 	    {
 	    	/* otherwise tcp buffer hogs */
@@ -294,9 +325,11 @@ static err_t telnet_close_or_abort_conn(struct tcp_pcb *pcb, struct telnet_clien
 	if (tcs != NULL)
 	{
 		tcs->pcb = NULL;
-		tcs->txbufferlen = 0;
+		tcs->txbufferlevel = 0;
 		tcs->txbuffersent = 0;
-		tcs->readytosend = true;
+		tcs->readyToSend = true;
+
+
 		tcs->retries = 0;
 	}
 
@@ -345,9 +378,9 @@ static void telnet_err(void *arg, err_t err)
 	if (tcs != NULL)
 	{
 		tcs->pcb = NULL;
-		tcs->txbufferlen = 0;
+		tcs->txbufferlevel = 0;
 		tcs->txbuffersent = 0;
-		tcs->readytosend = true;
+		tcs->readyToSend = true;
 		tcs->retries = 0;
 	}
 }
@@ -368,7 +401,7 @@ static err_t telnet_sent(void *arg, struct tcp_pcb *pcb, uint16_t len)
 		return ERR_OK;
 	}
 
-	tcs->readytosend = true;
+	tcs->readyToSend = true;
 	tcs->retries = 0;
 
 	telnet_send(pcb, tcs);
@@ -449,10 +482,17 @@ static err_t telnet_accept(void *arg, struct tcp_pcb *pcb, err_t err)
 	}
 	else
 	{
+		ringBuffer_Init(&telnet_client_states[i].rxFifo, telnetd_client_rxbuffers[i], TELNETD_MAX_BUFFERSIZE);
 		tcs = &telnet_client_states[i];
 		tcs->pcb = pcb;
 	}
+
 	LWIP_DEBUGF(HTTPD_DEBUG, ("http_accept: Using pool slot %d\n", i));
+	if (telnetd_open_cb != NULL)
+	{
+		// Fire callback with client index
+		telnetd_open_cb(pcb, i);
+	}
 
 	/* Tell TCP that this is the structure we
 	 * wish to be passed for our callbacks.
@@ -502,10 +542,12 @@ void telnetd_init(uint16_t port)
 	for (i = 0; i < TELNETD_MAX_CONN; i++)
 	{
 		telnet_client_states[i].pcb = NULL;
+
 		telnet_client_states[i].txbuffer = telnetd_client_txbuffers[i];
-		telnet_client_states[i].txbufferlen = 0;
+		telnet_client_states[i].txbufferlevel = 0;
 		telnet_client_states[i].txbuffersent = 0;
-		telnet_client_states[i].readytosend = true;
+
+		telnet_client_states[i].readyToSend = true;
 		telnet_client_states[i].retries = 0;
 	}
 

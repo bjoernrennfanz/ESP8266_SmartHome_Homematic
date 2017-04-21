@@ -7,6 +7,7 @@
  */
  
 #include <stdio.h>
+#include <stdbool.h>
 #include <stdint.h>
 
 #include "ringbuffer.h"
@@ -72,8 +73,14 @@ bool ringBuffer_IsEmpty(ring_buffer_t *pBuffer)
 	return false;
 }
 
-uint16_t ringBuffer_Available(ring_buffer_t *pBuffer)
+uint16_t ringBuffer_GetLevel(ring_buffer_t *pBuffer)
 {
 	// Return bytes count in buffer
 	return pBuffer->count;
+}
+
+uint16_t ringBuffer_GetFree(ring_buffer_t *pBuffer)
+{
+	// Return bytes count in buffer
+	return pBuffer->size - pBuffer->count;
 }

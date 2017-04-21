@@ -16,26 +16,31 @@
 #include <lwip/pbuf.h>
 #include <lwip/tcp.h>
 
+#include "ringbuffer.h"
+
 // Define maximum simultaneous connections
 #define TELNETD_MAX_CONN		5
 
 // Define maximum send buffer len
-#define TELNETD_MAX_TXBUFFER 	1024
+#define TELNETD_MAX_BUFFERSIZE 	256
 
 // Structure for client connection state
 struct telnet_client_state
 {
 	struct tcp_pcb *pcb;
-	uint8_t *txbuffer; // the buffer for the data to send
-	uint16_t txbufferlen; // the length of data in txbuffer
-	uint16_t txbuffersent; // the number of sent bytes in txbuffer.
-	bool readytosend; //true, if txbuffer can send by espconn_sent
+
+    uint8_t *txbuffer; // the buffer for the data to send
+    uint16_t txbufferlevel; // the count of data in txbuffer
+    uint16_t txbuffersent; // the number of sent bytes in txbuffer.
+	bool readyToSend; //true, if txbuffer can send by tcp_send
+
+	ring_buffer_t rxFifo; // the fifo for received data
 	uint8_t retries;
 };
 
 // Typedefs for callbacks of telnetd
 typedef void (*tTcHandler)(struct tcp_pcb *pcb, uint8_t *data, uint16_t data_len);
-typedef void (*tTcOpenHandler)(struct tcp_pcb *pcb);
+typedef void (*tTcOpenHandler)(struct tcp_pcb *pcb, uint8_t client_index);
 
 /**
  * Write data to a connected telnet client.

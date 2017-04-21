@@ -23,10 +23,18 @@
  */
 void telnetd_cb(struct tcp_pcb *pcb, uint8_t *data, uint16_t data_len)
 {
-    printf("[telnetd_receive_cb]:\n%.*s\n", (int) data_len, (char*) data);
+    printf("[telnetd_receive_cb]:\nread %d - %s\n", (int) data_len, (char*) data);
 
     // Loop back data
     telnetd_client_write(pcb, data, data_len);
+}
+
+/**
+ * This function is called when telnetd client is connected.
+ */
+void telnetd_open_cb(struct tcp_pcb *pcb, uint8_t client_index)
+{
+	printf("telnetd: Client on slot %d connected.\n");
 }
 
 void telnetd_task(void *pvParameters)
@@ -34,7 +42,7 @@ void telnetd_task(void *pvParameters)
     /*
      * Register handlers and start the server
      */
-    telnetd_register_callbacks(NULL, (tTcHandler) telnetd_cb);
+    telnetd_register_callbacks((tTcOpenHandler) telnetd_open_cb, (tTcHandler) telnetd_cb);
     telnetd_init(23);
 
     for (;;);
