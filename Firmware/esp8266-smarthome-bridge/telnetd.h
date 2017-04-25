@@ -17,7 +17,7 @@
 #include <lwip/tcp.h>
 
 // Define maximum simultaneous connections
-#define TELNETD_MAX_CONN		5
+#define TELNETD_MAX_CONN		3
 
 // Define maximum send buffer len
 #define TELNETD_MAX_BUFFERSIZE 	384

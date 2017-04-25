@@ -14,6 +14,7 @@
 
 #include "telnet_server_task.h"
 #include "telnetd.h"
+#include "command.h"
 
 /**
  * This function is called when telnetd receives data from client.
@@ -23,7 +24,8 @@
  */
 void telnetd_cb(struct tcp_pcb *pcb, uint8_t *data, uint16_t data_len)
 {
-    printf("[telnetd_receive_cb]:\nread %d - %s\n", (int) data_len, (char*) data);
+    printf("[telnetd_receive_cb]:\nread %u - %s\n", (int) data_len, (char*) data);
+	command_parse_line(pcb, data, data_len);
 
     // Loop back data
     telnetd_client_write(pcb, data, data_len);
@@ -34,11 +36,16 @@ void telnetd_cb(struct tcp_pcb *pcb, uint8_t *data, uint16_t data_len)
  */
 void telnetd_open_cb(struct tcp_pcb *pcb, uint8_t client_index)
 {
-	printf("telnetd: Client on slot %d connected.\n");
+	printf("telnetd: Client on slot %u connected.\n", client_index);
 }
 
 void telnetd_task(void *pvParameters)
 {
+	/*
+	 * Initialize command parser
+	 */
+	command_init();
+
     /*
      * Register handlers and start the server
      */

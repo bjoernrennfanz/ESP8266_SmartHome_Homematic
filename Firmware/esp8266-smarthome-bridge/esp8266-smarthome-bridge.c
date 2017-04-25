@@ -20,7 +20,6 @@
 #include "telnet_server_task.h"
 #include "dht_poll_task.h"
 
-
 void dhtProceedValuesTask(void *pvParameters)
 {
 	// Create struct for received values
@@ -47,7 +46,17 @@ void user_init(void)
     uart_set_baud(0, 115200);
     printf("ESP8266 HW-SDK version: %s\n", sdk_system_get_sdk_version());
 
+    struct sdk_station_config config = {
+        .ssid = "SEWB113",
+        .password = "palmm100",
+    };
+
+    /* required to call wifi_set_opmode before station_set_config */
+    sdk_wifi_set_opmode(STATION_MODE);
+    sdk_wifi_station_set_config(&config);
+    sdk_wifi_station_connect();
+
     xTaskCreate(dhtProceedValuesTask, "dhtProceedValuesTask", 192, NULL, 2, NULL);
     xTaskCreate(dhtMeasurementTask, "dhtMeasurementTask", 128, NULL, 2, NULL);
-    xTaskCreate(telnetd_task, "telnetd_task", 128, NULL, 2, NULL);
+    xTaskCreate(telnetd_task, "telnetd_task", 512, NULL, 2, NULL);
 }
