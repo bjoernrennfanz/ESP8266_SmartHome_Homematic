@@ -28,7 +28,7 @@ void telnetd_cb(struct tcp_pcb *pcb, uint8_t *data, uint16_t data_len)
 	command_parse_line(pcb, data, data_len);
 
     // Loop back data
-    telnetd_client_write(pcb, data, data_len);
+    // telnetd_client_write(pcb, data, data_len);
 }
 
 /**

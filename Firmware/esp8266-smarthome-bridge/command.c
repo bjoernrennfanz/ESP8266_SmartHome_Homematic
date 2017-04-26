@@ -8,6 +8,7 @@
 
 #include "command.h"
 #include "drivers/malloc_static_buffer.h"
+#include "telnetd.h"
 
 #include<string.h>
 
@@ -67,9 +68,6 @@ void command_parse_line(struct tcp_pcb *pcb, uint8_t *buf, uint16_t len)
 	memcpy(lbuf, buf, len);
 	lbuf[len] = '\0';
 
-	// command echo
-	//espbuffsent(conn, lbuf, len);
-
 	// remove any CR / LF
 	for (i = 0; i < len; ++i)
 		if (lbuf[i] == '\n' || lbuf[i] == '\r')
@@ -78,15 +76,25 @@ void command_parse_line(struct tcp_pcb *pcb, uint8_t *buf, uint16_t len)
 	// verify the command prefix
 	if (strncmp(lbuf, "AT+", 3) != 0) 
 	{
-		printf("%s", lbuf);
-		printf("No AT command");
+		// Generate output message
+		int responseLen = snprintf(NULL, 0, MSG_INVALID_CMD);
+		char *responseBuf = (char *)sbMalloc(&commandSbMallocHeap, responseLen + 1);
+		snprintf(responseBuf, responseLen, MSG_INVALID_CMD);
+
+		// Write data back
+		telnetd_client_write(pcb, responseBuf, responseLen);
+
+		// Clean up
+		sbFree(&commandSbMallocHeap, responseBuf);
 		sbFree(&commandSbMallocHeap, lbuf);
+
 		return;
 	}
 	// parse out buffer into arguments
 	argv = command_parse_args(&lbuf[3], &argc);
 	
 	printf("Parsed %d arguments", argc);
+
 
 	command_parse_args_free(argc, argv);
 	sbFree(&commandSbMallocHeap, lbuf);

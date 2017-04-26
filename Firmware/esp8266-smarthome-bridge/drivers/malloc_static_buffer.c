@@ -2,7 +2,7 @@
  * malloc_static_buffer.h
  *
  *  Created on: 22.04.2017
- *      Author: Björn Rennfanz <bjoern@fam-rennfanz.de>
+ *      Author: Bjï¿½rn Rennfanz <bjoern@fam-rennfanz.de>
  *      License: MIT, see LICENSE file for more details.
  *
  *      Remarks: For detailed information about malloc implementation
@@ -136,7 +136,7 @@ malloc_static_buffer_block_t malloc_static_buffer_get_block(malloc_static_buffer
 {
 	char *tmp;
 	tmp = p;
-	
+
 	return (p = tmp -= MALLOC_STATIC_BUFFER_BLOCKSIZE);
 }
 
@@ -145,12 +145,9 @@ bool malloc_static_buffer_valid_addr(malloc_static_buffer_heap_t *heap, void *p)
 	// Check if base address is set
 	if(heap->malloc_static_buffer_base)
 	{
-		printf("test1\n");
 		// Check if pointer is in correct range
 		if((p > (void *)(heap->malloc_static_buffer_base)) && (p < (void *)(heap->malloc_static_buffer_brkval)))
 		{
-			printf("test2\n");
-
 			// Verify that pointer matches block pointer
 			return (p == (malloc_static_buffer_get_block(heap, p))->ptr);
 		}
@@ -335,7 +332,7 @@ void *malloc_static_buffer_realloc(malloc_static_buffer_heap_t *heap, void *p, u
 				ptrNewBlock = malloc_static_buffer_malloc(heap, s);
 				if (!ptrNewBlock)
 				{
-					// We’re doomed!
+					// Weï¿½re doomed!
 					return NULL;
 				}
 
@@ -356,6 +353,6 @@ void *malloc_static_buffer_realloc(malloc_static_buffer_heap_t *heap, void *p, u
 		return p;
 	}
 	
-	// We’re doomed!
+	// Weï¿½re doomed!
 	return NULL;
 }
