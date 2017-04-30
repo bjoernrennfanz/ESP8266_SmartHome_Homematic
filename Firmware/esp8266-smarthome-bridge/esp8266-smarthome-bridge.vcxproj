@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClInclude Include="command.h" />
     <ClInclude Include="dht_poll_task.h" />
+    <ClInclude Include="drivers\cc1101.h" />
     <ClInclude Include="drivers\malloc_static_buffer.h" />
     <ClInclude Include="drivers\ringbuffer.h" />
     <ClInclude Include="telnetd.h" />
@@ -29,6 +30,7 @@
   <ItemGroup>
     <ClCompile Include="command.c" />
     <ClCompile Include="dht_poll_task.c" />
+    <ClCompile Include="drivers\cc1101.c" />
     <ClCompile Include="drivers\malloc_static_buffer.c" />
     <ClCompile Include="drivers\ringbuffer.c" />
     <ClCompile Include="esp8266-smarthome-bridge.c" />

@@ -20,6 +20,8 @@
 #include "telnet_server_task.h"
 #include "dht_poll_task.h"
 
+#include "drivers\cc1101.h"
+
 void dhtProceedValuesTask(void *pvParameters)
 {
 	// Create struct for received values
@@ -41,6 +43,57 @@ void dhtProceedValuesTask(void *pvParameters)
 	}
 }
 
+void cc1101ProceedTask(void *pvParameters)
+{
+	uint8_t tmpCCBurst = 0, chkCCBurst = 0;
+	uint8_t ccBuffer[60];
+
+	// Create struct for received values
+	cc1101_module_t module = {
+		.crc_ok = 0,
+		.rssi = 0,
+		.lqi = 0,
+		.cs_pin = 16
+	};
+
+	// Initialize CC1101
+	cc1101_init(&module);
+
+	while (1)
+	{
+		tmpCCBurst = cc1101_detect_burst(&module);
+		if ((tmpCCBurst) && (!chkCCBurst)) 
+		{			
+			// burst detected for the first time
+			chkCCBurst = 1;	// set the flag
+		} 
+		else
+		{
+			if ((tmpCCBurst) && (chkCCBurst))
+			{		// burst detected for the second time
+				chkCCBurst = 0;	// reset the flag
+				printf("Burst detected!\n");
+			}
+			else
+			{
+				if ((!tmpCCBurst) && (chkCCBurst))
+				{		// secondary test was negative, reset the flag
+					chkCCBurst = 0;	// reset the flag	
+				}
+			}
+		}
+
+		// if (!chkCCBurst) vTaskDelay(128 / portTICK_PERIOD_MS);
+		if (chkCCBurst) vTaskDelay(32 / portTICK_PERIOD_MS);
+
+		uint8_t num = cc1101_rcv_data(&module, &ccBuffer[0]);
+		if (num)
+		{
+			printf("%d Bytes read, CRC %s, RSSI %d, Link quality %d\n", num, module.crc_ok ? "Ok" : "NOk", module.rssi, module.lqi);
+		}
+	}
+}
+
 void user_init(void)
 {
     uart_set_baud(0, 115200);
@@ -58,5 +111,6 @@ void user_init(void)
 
     xTaskCreate(dhtProceedValuesTask, "dhtProceedValuesTask", 192, NULL, 2, NULL);
     xTaskCreate(dhtMeasurementTask, "dhtMeasurementTask", 128, NULL, 2, NULL);
-    xTaskCreate(telnetd_task, "telnetd_task", 512, NULL, 2, NULL);
+	xTaskCreate(cc1101ProceedTask, "cc1101ProceedTask", 256, NULL, 2, NULL);
+    // xTaskCreate(telnetd_task, "telnetd_task", 512, NULL, 2, NULL);
 }
