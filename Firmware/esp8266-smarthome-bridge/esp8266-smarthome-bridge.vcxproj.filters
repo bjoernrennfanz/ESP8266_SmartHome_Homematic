@@ -39,6 +39,9 @@
     <ClInclude Include="drivers\malloc_static_buffer.h">
       <Filter>Headerdateien\drivers</Filter>
     </ClInclude>
+    <ClInclude Include="drivers\cc1101.h">
+      <Filter>Headerdateien\drivers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="command.c">
@@ -60,6 +63,9 @@
       <Filter>Quelldateien\drivers</Filter>
     </ClCompile>
     <ClCompile Include="drivers\malloc_static_buffer.c">
+      <Filter>Quelldateien\drivers</Filter>
+    </ClCompile>
+    <ClCompile Include="drivers\cc1101.c">
       <Filter>Quelldateien\drivers</Filter>
     </ClCompile>
   </ItemGroup>
