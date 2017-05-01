@@ -2,7 +2,7 @@
  * malloc_static_buffer.h
  *
  *  Created on: 22.04.2017
- *      Author: Björn Rennfanz <bjoern@fam-rennfanz.de>
+ *      Author: BjÃ¶rn Rennfanz <bjoern@fam-rennfanz.de>
  *      License: MIT, see LICENSE file for more details.
  */
 
@@ -52,7 +52,7 @@ typedef struct malloc_static_buffer_block_s *malloc_static_buffer_block_t;
 typedef struct malloc_static_buffer_heap_s malloc_static_buffer_heap_t;
 
 // Define the block size since the sizeof will be wrong
-#define MALLOC_STATIC_BUFFER_BLOCKSIZE (sizeof(struct malloc_static_buffer_block_s) - sizeof(char))
+#define MALLOC_STATIC_BUFFER_BLOCKSIZE 20
 
 // Define the MIN and MAX macors
 #define MIN(a,b) (((a)<(b))?(a):(b))
