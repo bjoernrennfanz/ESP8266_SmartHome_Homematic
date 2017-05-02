@@ -19,18 +19,21 @@
     <Filter Include="Quelldateien\drivers">
       <UniqueIdentifier>{90077c52-dd3f-47ca-ba2c-8892c50c3075}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Headerdateien\tado_v2_api">
+      <UniqueIdentifier>{c3d9a03e-7b23-4298-9fc8-4dcb7a0b050f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Quelldateien\tado_v2_api">
+      <UniqueIdentifier>{57f1d3c9-85c9-471b-9428-f608125ccf84}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headerdateien\homematic">
+      <UniqueIdentifier>{9e65c8a6-3529-4ec3-9c01-35ed90a8e3f9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Quelldateien\homematic">
+      <UniqueIdentifier>{85e51dcb-b567-438b-934a-2b2215dc7b9c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="command.h">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
     <ClInclude Include="dht_poll_task.h">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
-    <ClInclude Include="telnet_server_task.h">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
-    <ClInclude Include="telnetd.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
     <ClInclude Include="drivers\ringbuffer.h">
@@ -42,21 +45,21 @@
     <ClInclude Include="drivers\cc1101.h">
       <Filter>Headerdateien\drivers</Filter>
     </ClInclude>
+    <ClInclude Include="homematic\homematic.h">
+      <Filter>Headerdateien\homematic</Filter>
+    </ClInclude>
+    <ClInclude Include="homematic\wait_timer.h">
+      <Filter>Headerdateien\homematic</Filter>
+    </ClInclude>
+    <ClInclude Include="homematic\homematic_receiver.h">
+      <Filter>Headerdateien\homematic</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="command.c">
-      <Filter>Quelldateien</Filter>
-    </ClCompile>
     <ClCompile Include="dht_poll_task.c">
       <Filter>Quelldateien</Filter>
     </ClCompile>
     <ClCompile Include="esp8266-smarthome-bridge.c">
-      <Filter>Quelldateien</Filter>
-    </ClCompile>
-    <ClCompile Include="telnet_server_task.c">
-      <Filter>Quelldateien</Filter>
-    </ClCompile>
-    <ClCompile Include="telnetd.c">
       <Filter>Quelldateien</Filter>
     </ClCompile>
     <ClCompile Include="drivers\ringbuffer.c">
@@ -68,10 +71,28 @@
     <ClCompile Include="drivers\cc1101.c">
       <Filter>Quelldateien\drivers</Filter>
     </ClCompile>
+    <ClCompile Include="tado_v2_api\godaddyca_cert.c">
+      <Filter>Quelldateien\tado_v2_api</Filter>
+    </ClCompile>
+    <ClCompile Include="homematic\homematic.cpp">
+      <Filter>Quelldateien\homematic</Filter>
+    </ClCompile>
+    <ClCompile Include="homematic\wait_timer.cpp">
+      <Filter>Quelldateien\homematic</Filter>
+    </ClCompile>
+    <ClCompile Include="homematic\homematic_receiver.cpp">
+      <Filter>Quelldateien\homematic</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Makefile" />
     <None Include="README.md" />
     <None Include="drivers\component.mk" />
+    <None Include="tado_v2_api\component.mk">
+      <Filter>Quelldateien\tado_v2_api</Filter>
+    </None>
+    <None Include="homematic\component.mk">
+      <Filter>Quelldateien\homematic</Filter>
+    </None>
   </ItemGroup>
 </Project>

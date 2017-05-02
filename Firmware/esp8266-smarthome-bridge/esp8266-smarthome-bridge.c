@@ -2,7 +2,7 @@
  * esp8266-smarthome-bridge.c
  *
  *  Created on: 04.03.2017
- *      Author: Björn Rennfanz <bjoern@fam-rennfanz.de>
+ *      Author: Bjoern Rennfanz <bjoern@fam-rennfanz.de>
  *      License: MIT, see LICENSE file for more details.
  */
 
@@ -13,13 +13,13 @@
 #include "esp/uart.h"
 
 #include "FreeRTOS.h"
-#include "task.h"
-#include "queue.h"
 #include "esp8266.h"
+#include "queue.h"
+#include "task.h"
 
-#include "dht_poll_task.h"
-
+#include "homematic\homematic.h"
 #include "drivers\cc1101.h"
+#include "dht_poll_task.h"
 
 void dhtProceedValuesTask(void *pvParameters)
 {
@@ -34,7 +34,7 @@ void dhtProceedValuesTask(void *pvParameters)
 			// Receive a message on the created dht_rx_queue.
 			if( xQueueReceive(dht_transfer_queue, (void *)&rx_dht_measurement, (TickType_t)0 ) )
 			{
-				printf("Humidity: %d%% Temp: %dC\n", rx_dht_measurement.humidity / 10, rx_dht_measurement.temperature / 10);
+				printf("DHT11: Humidity: %d%% Temp: %dC\n", rx_dht_measurement.humidity / 10, rx_dht_measurement.temperature / 10);
 			}
 		}
 
@@ -44,52 +44,31 @@ void dhtProceedValuesTask(void *pvParameters)
 
 void cc1101ProceedTask(void *pvParameters)
 {
-	uint8_t tmpCCBurst = 0, chkCCBurst = 0;
-	uint8_t ccBuffer[60];
-
-	// Create struct for received values
-	cc1101_module_t module = {
+	// Create struct for module config values
+	cc1101_driver_config_t module_config = {
 		.crc_ok = 0,
 		.rssi = 0,
 		.lqi = 0,
 		.cs_pin = 16
 	};
 
-	// Initialize CC1101
-	cc1101_init(&module);
+	// Create struct for module callbacks
+	cc1101_driver_t module_driver = {
+		.set_idle = cc1101_set_idle,
+		.detect_burst = cc1101_detect_burst,
+		.init = cc1101_init,
+		.snd_data = cc1101_snd_data,
+		.rcv_data = cc1101_rcv_data
+	};
+
+	// Initialize homematic
+	homematic_handle_t homematicInstance = homematic_construct();
+	homematic_init(homematicInstance, &module_driver, &module_config);
 
 	while (1)
 	{
-		tmpCCBurst = cc1101_detect_burst(&module);
-		if ((tmpCCBurst) && (!chkCCBurst)) 
-		{			
-			// burst detected for the first time
-			chkCCBurst = 1;	// set the flag
-		} 
-		else
-		{
-			if ((tmpCCBurst) && (chkCCBurst))
-			{		// burst detected for the second time
-				chkCCBurst = 0;	// reset the flag
-				printf("Burst detected!\n");
-			}
-			else
-			{
-				if ((!tmpCCBurst) && (chkCCBurst))
-				{		// secondary test was negative, reset the flag
-					chkCCBurst = 0;	// reset the flag	
-				}
-			}
-		}
-
-		// if (!chkCCBurst) vTaskDelay(128 / portTICK_PERIOD_MS);
-		if (chkCCBurst) vTaskDelay(32 / portTICK_PERIOD_MS);
-
-		uint8_t num = cc1101_rcv_data(&module, &ccBuffer[0]);
-		if (num)
-		{
-			printf("%d Bytes read, CRC %s, RSSI %d, Link quality %d\n", num, module.crc_ok ? "Ok" : "NOk", module.rssi, module.lqi);
-		}
+		// Handle homematic communication
+		homematic_poll(homematicInstance);
 	}
 }
 

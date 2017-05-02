@@ -32,51 +32,51 @@ static const spi_settings_t cc1101_bus_settings = {
 };
 
 // Internal prototypes
-void cc1101_strobe(cc1101_module_t *mod, uint8_t cmd);										// send command strobe to the CC1101 IC via SPI
-void cc1101_read_burst(cc1101_module_t *mod, uint8_t * buf, uint8_t regAddr, uint8_t len);	// read burst data from CC1101 via SPI
-void cc1101_write_burst(cc1101_module_t *mod, uint8_t regAddr, uint8_t* buf, uint8_t len);	// write multiple registers into the CC1101 IC via SPI
-uint8_t cc1101_read_reg(cc1101_module_t *mod, uint8_t regAddr, uint8_t regType);			// read CC1101 register via SPI
-void cc1101_write_reg(cc1101_module_t *mod, uint8_t regAddr, uint8_t val);
+void cc1101_strobe(cc1101_driver_config_t *config, uint8_t cmd);										// send command strobe to the CC1101 IC via SPI
+void cc1101_read_burst(cc1101_driver_config_t *config, uint8_t * buf, uint8_t regAddr, uint8_t len);	// read burst data from CC1101 via SPI
+void cc1101_write_burst(cc1101_driver_config_t *config, uint8_t regAddr, uint8_t* buf, uint8_t len);	// write multiple registers into the CC1101 IC via SPI
+uint8_t cc1101_read_reg(cc1101_driver_config_t *config, uint8_t regAddr, uint8_t regType);			// read CC1101 register via SPI
+void cc1101_write_reg(cc1101_driver_config_t *config, uint8_t regAddr, uint8_t val);
 
-void cc1101_wait_miso(cc1101_module_t *mod)
+void cc1101_wait_miso(cc1101_driver_config_t *config)
 {
 	// Avoid unused warning
-	(void)mod;
+	(void)config;
 
 	// Wait until MISO goes low
 	while (gpio_read(12) == 1);
 }
 
-void cc1101_set_idle(cc1101_module_t *mod)
+void cc1101_set_idle(cc1101_driver_config_t *config)
 {
 	// Coming from RX state, we need to enter the IDLE state first
-	cc1101_strobe(mod, CC1101_CMD_SIDLE);
-	cc1101_strobe(mod, CC1101_CMD_SFRX);
-	cc1101_strobe(mod, CC1101_CMD_SPWD);
+	cc1101_strobe(config, CC1101_CMD_SIDLE);
+	cc1101_strobe(config, CC1101_CMD_SFRX);
+	cc1101_strobe(config, CC1101_CMD_SPWD);
 }
 
-uint8_t cc1101_detect_burst(cc1101_module_t *mod)
+uint8_t cc1101_detect_burst(cc1101_driver_config_t *config)
 {
-	// Power on cc1101 module and set to RX mode
-	gpio_write(mod->cs_pin, false);
-	cc1101_wait_miso(mod);
-	gpio_write(mod->cs_pin, true);
+	// Power on cc1101 configule and set to RX confige
+	gpio_write(config->cs_pin, false);
+	cc1101_wait_miso(config);
+	gpio_write(config->cs_pin, true);
 
 	// Wait for wakeup of CC1101
 	for (uint8_t i = 0; i < 200; i++) 
 	{	
 		// instead of delay, check the really needed time to wakeup
-		if (cc1101_read_reg(mod, CC1101_REG_MARCSTATE, CC1101_TYPE_STATUS) != 0xff) break;
+		if (cc1101_read_reg(config, CC1101_REG_MARCSTATE, CC1101_TYPE_STATUS) != 0xff) break;
 		sdk_os_delay_us(10);
 	}
 
-	// set RX mode again
-	cc1101_strobe(mod, CC1101_CMD_SRX);								
+	// set RX confige again
+	cc1101_strobe(config, CC1101_CMD_SRX);								
 
 	uint8_t bTmp;
 	for (uint8_t i = 0; i < 200; i++) 
-	{																			// check if we are in RX mode
-		bTmp = cc1101_read_reg(mod, CC1101_REG_PKTSTATUS, CC1101_TYPE_STATUS);	// read the status of the line
+	{																			// check if we are in RX confige
+		bTmp = cc1101_read_reg(config, CC1101_REG_PKTSTATUS, CC1101_TYPE_STATUS);	// read the status of the line
 		if ((bTmp & 0x10) || (bTmp & 0x40)) break;								// check for channel clear, or carrier sense
 		sdk_os_delay_us(10);													// wait a bit
 	}
@@ -84,23 +84,23 @@ uint8_t cc1101_detect_burst(cc1101_module_t *mod)
 	return (bTmp & 0x40) ? 1 : 0;												// return carrier sense bit
 }
 
-void cc1101_init(cc1101_module_t *mod)
+void cc1101_init(cc1101_driver_config_t *config)
 {
-	debug("Initialize CC1101 using chip select on GPIO%d", mod->cs_pin);
+	debug("Initialize CC1101 using chip select on GPIO%d", config->cs_pin);
 
 	// Set chip select to high
-	gpio_enable(mod->cs_pin, GPIO_OUTPUT);
-	gpio_write(mod->cs_pin, true);
+	gpio_enable(config->cs_pin, GPIO_OUTPUT);
+	gpio_write(config->cs_pin, true);
 
 	// Initializing sequence
 	sdk_os_delay_us(5);
-	gpio_write(mod->cs_pin, false);
+	gpio_write(config->cs_pin, false);
 	sdk_os_delay_us(10);
-	gpio_write(mod->cs_pin, true);
+	gpio_write(config->cs_pin, true);
 	sdk_os_delay_us(41);
 
 	// Send reset
-	cc1101_strobe(mod, CC1101_CMD_SRES);															
+	cc1101_strobe(config, CC1101_CMD_SRES);															
 	sdk_os_delay_us(10000);
 
 	// define init settings for TRX868
@@ -146,74 +146,74 @@ void cc1101_init(cc1101_module_t *mod)
 
 	for (uint8_t i = 0; i < sizeof(initVal); i += 2)
 	{	// Write init value to TRX868
-		cc1101_write_reg(mod, initVal[i], initVal[i + 1]);
+		cc1101_write_reg(config, initVal[i], initVal[i + 1]);
 		debug("%d: %02x %02x", i, initVal[i], initVal[i + 1]);
 	}
 
-	cc1101_strobe(mod, CC1101_CMD_SCAL);	// calibrate frequency synthesizer and turn it off
-	while (cc1101_read_reg(mod, CC1101_REG_MARCSTATE, CC1101_TYPE_STATUS) != 1)
-	{	// waits until module gets ready
+	cc1101_strobe(config, CC1101_CMD_SCAL);	// calibrate frequency synthesizer and turn it off
+	while (cc1101_read_reg(config, CC1101_REG_MARCSTATE, CC1101_TYPE_STATUS) != 1)
+	{	// waits until configule gets ready
 		sdk_os_delay_us(1);
 	}
 
-	cc1101_write_reg(mod, CC1101_REG_PATABLE, CC1101_PA_MAXPOWER);	// configure PATABLE
-	cc1101_strobe(mod, CC1101_CMD_SRX);								// flush the RX buffer
-	cc1101_strobe(mod, CC1101_CMD_SWORRST);							// reset real time clock
+	cc1101_write_reg(config, CC1101_REG_PATABLE, CC1101_PA_MAXPOWER);	// configure PATABLE
+	cc1101_strobe(config, CC1101_CMD_SRX);								// flush the RX buffer
+	cc1101_strobe(config, CC1101_CMD_SWORRST);							// reset real time clock
 
 	debug("%s", "CC1101 is ready\n");
 }
 
-uint8_t cc1101_snd_data(cc1101_module_t *mod, uint8_t *buf, uint8_t burst)
+uint8_t cc1101_snd_data(cc1101_driver_config_t *config, uint8_t *buf, uint8_t burst)
 {
 	// Going from RX to TX does not work if there was a reception less than 0.5
 	// sec ago. Due to CCA? Using IDLE helps to shorten this period(?)
-	cc1101_strobe(mod, CC1101_CMD_SIDLE);			// go to idle mode
-	cc1101_strobe(mod, CC1101_CMD_SFRX);			// flush RX buffer
-	cc1101_strobe(mod, CC1101_CMD_SFTX);			// flush TX buffer
-	debug("%s", "Switch to transmit mode");
+	cc1101_strobe(config, CC1101_CMD_SIDLE);			// go to idle confige
+	cc1101_strobe(config, CC1101_CMD_SFRX);			// flush RX buffer
+	cc1101_strobe(config, CC1101_CMD_SFTX);			// flush TX buffer
+	debug("%s", "Switch to transmit confige");
 
 	if (burst)										// BURST-bit set?
 	{
-		cc1101_strobe(mod, CC1101_CMD_STX);			// send a burst
+		cc1101_strobe(config, CC1101_CMD_STX);			// send a burst
 		sdk_os_delay_us(36000);						// according to ELV, devices get activated every 300ms, so send burst for 360ms
 		debug("%s", "Send burst sequence");
 	}
 	else 
 	{
-		sdk_os_delay_us(1000);						// wait a short time to set TX mode
+		sdk_os_delay_us(1000);						// wait a short time to set TX confige
 	}
 
 	// write in TX FIFO
-	cc1101_write_burst(mod, CC1101_REG_TXFIFO, buf, buf[0] + 1);
+	cc1101_write_burst(config, CC1101_REG_TXFIFO, buf, buf[0] + 1);
 
-	cc1101_strobe(mod, CC1101_CMD_SFRX);			// flush the RX buffer
-	cc1101_strobe(mod, CC1101_CMD_STX);				// send a burst
+	cc1101_strobe(config, CC1101_CMD_SFRX);			// flush the RX buffer
+	cc1101_strobe(config, CC1101_CMD_STX);				// send a burst
 
 	for (uint8_t i = 0; i < 200; i++) 
 	{	
-		// after sending out all bytes the chip should go automatically in RX mode
-		if (cc1101_read_reg(mod, CC1101_REG_MARCSTATE, CC1101_TYPE_STATUS) == CC1101_CMS_RX)
-			break;									//now in RX mode, good
-		if (cc1101_read_reg(mod, CC1101_REG_MARCSTATE, CC1101_TYPE_STATUS) != CC1101_CMS_TX)
+		// after sending out all bytes the chip should go automatically in RX confige
+		if (cc1101_read_reg(config, CC1101_REG_MARCSTATE, CC1101_TYPE_STATUS) == CC1101_CMS_RX)
+			break;									//now in RX confige, good
+		if (cc1101_read_reg(config, CC1101_REG_MARCSTATE, CC1101_TYPE_STATUS) != CC1101_CMS_TX)
 			break;									//neither in RX nor TX, probably some error
 
 		sdk_os_delay_us(10);
 	}
 	
-	debug("%s", "Switch to receive mode");
+	debug("%s", "Switch to receive confige");
 	return true;
 }
 
-uint8_t cc1101_rcv_data(cc1101_module_t *mod, uint8_t *buf)
+uint8_t cc1101_rcv_data(cc1101_driver_config_t *config, uint8_t *buf)
 {
 	// how many bytes are in the buffer
-	uint8_t rxBytes = cc1101_read_reg(mod, CC1101_REG_RXBYTES, CC1101_TYPE_STATUS);
+	uint8_t rxBytes = cc1101_read_reg(config, CC1101_REG_RXBYTES, CC1101_TYPE_STATUS);
 
 	// any byte waiting to be read and no overflow?
 	if ((rxBytes & 0x7F) && !(rxBytes & 0x80)) 
 	{
 		// read data length
-		buf[0] = cc1101_read_reg(mod, CC1101_REG_RXFIFO, CC1101_TYPE_CONFIG);
+		buf[0] = cc1101_read_reg(config, CC1101_REG_RXFIFO, CC1101_TYPE_CONFIG);
 
 		// if packet is too long
 		if (buf[0] > CC1101_DATA_LEN) 
@@ -224,22 +224,22 @@ uint8_t cc1101_rcv_data(cc1101_module_t *mod, uint8_t *buf)
 		else 
 		{
 			// read data packet
-			cc1101_read_burst(mod, &buf[1], CC1101_REG_RXFIFO, buf[0]);	
+			cc1101_read_burst(config, &buf[1], CC1101_REG_RXFIFO, buf[0]);	
 
 			// read RSSI
-			mod->rssi = cc1101_read_reg(mod, CC1101_REG_RXFIFO, CC1101_TYPE_CONFIG);
+			config->rssi = cc1101_read_reg(config, CC1101_REG_RXFIFO, CC1101_TYPE_CONFIG);
 
-			if (mod->rssi >= 128) 
-				mod->rssi = 255 - mod->rssi;
+			if (config->rssi >= 128) 
+				config->rssi = 255 - config->rssi;
 			
-			mod->rssi /= 2; 
-			mod->rssi += 72;
+			config->rssi /= 2; 
+			config->rssi += 72;
 
 			// read LQI and CRC_OK
-			uint8_t val = cc1101_read_reg(mod, CC1101_REG_RXFIFO, CC1101_TYPE_CONFIG);
+			uint8_t val = cc1101_read_reg(config, CC1101_REG_RXFIFO, CC1101_TYPE_CONFIG);
 
-			mod->lqi = val & 0x7F;
-			mod->crc_ok = val & 0x80;
+			config->lqi = val & 0x7F;
+			config->crc_ok = val & 0x80;
 		}
 	}
 	else
@@ -248,10 +248,10 @@ uint8_t cc1101_rcv_data(cc1101_module_t *mod, uint8_t *buf)
 		buf[0] = 0;
 	}
 
-	cc1101_strobe(mod, CC1101_CMD_SFRX);	// flush Rx FIFO
-	cc1101_strobe(mod, CC1101_CMD_SIDLE);	// enter IDLE state
-	cc1101_strobe(mod, CC1101_CMD_SRX);		// back to RX state
-	cc1101_strobe(mod, CC1101_CMD_SWORRST);	// reset real time clock
+	cc1101_strobe(config, CC1101_CMD_SFRX);	// flush Rx FIFO
+	cc1101_strobe(config, CC1101_CMD_SIDLE);	// enter IDLE state
+	cc1101_strobe(config, CC1101_CMD_SRX);		// back to RX state
+	cc1101_strobe(config, CC1101_CMD_SWORRST);	// reset real time clock
 
 	// Debug outputs
 
@@ -262,7 +262,7 @@ uint8_t cc1101_rcv_data(cc1101_module_t *mod, uint8_t *buf)
 	return buf[0];
 }
 
-void cc1101_strobe(cc1101_module_t *mod, uint8_t cmd)
+void cc1101_strobe(cc1101_driver_config_t *config, uint8_t cmd)
 {
 	// Store current spi settings
 	spi_settings_t old_settings;
@@ -270,83 +270,83 @@ void cc1101_strobe(cc1101_module_t *mod, uint8_t cmd)
 	spi_set_settings(SPI_BUS, &cc1101_bus_settings);
 
 	// Send command strobe to the CC1101 IC via SPI
-	gpio_write(mod->cs_pin, false);					// select CC1101
-	cc1101_wait_miso(mod);							// wait until MISO goes low
+	gpio_write(config->cs_pin, false);					// select CC1101
+	cc1101_wait_miso(config);							// wait until MISO goes low
 	
 	spi_transfer_8(SPI_BUS, cmd);					// send strobe command
 
-	gpio_write(mod->cs_pin, true);					// deselect CC1101
+	gpio_write(config->cs_pin, true);					// deselect CC1101
 	spi_set_settings(SPI_BUS, &old_settings);		// Restore old spi settings																	
 }
 
-void cc1101_read_burst(cc1101_module_t *mod, uint8_t * buf, uint8_t regAddr, uint8_t len)
+void cc1101_read_burst(cc1101_driver_config_t *config, uint8_t * buf, uint8_t regAddr, uint8_t len)
 {
 	// Store current spi settings
 	spi_settings_t old_settings;
 	spi_get_settings(SPI_BUS, &old_settings);
 	spi_set_settings(SPI_BUS, &cc1101_bus_settings);
 
-	gpio_write(mod->cs_pin, false);							// select CC1101
-	cc1101_wait_miso(mod);									// wait until MISO goes low
+	gpio_write(config->cs_pin, false);							// select CC1101
+	cc1101_wait_miso(config);									// wait until MISO goes low
 
 	spi_transfer_8(SPI_BUS, regAddr | CC1101_READ_BURST);	// send register address
 	for (uint8_t i = 0; i<len; i++) 
 		buf[i] = spi_transfer_8(SPI_BUS, 0x00);				// read result byte by byte
 
-	gpio_write(mod->cs_pin, true);							// deselect CC1101
+	gpio_write(config->cs_pin, true);							// deselect CC1101
 	spi_set_settings(SPI_BUS, &old_settings);				// Restore old spi settings	
 }
 
-void cc1101_write_burst(cc1101_module_t *mod, uint8_t regAddr, uint8_t* buf, uint8_t len)
+void cc1101_write_burst(cc1101_driver_config_t *config, uint8_t regAddr, uint8_t* buf, uint8_t len)
 {
 	// Store current spi settings
 	spi_settings_t old_settings;
 	spi_get_settings(SPI_BUS, &old_settings);
 	spi_set_settings(SPI_BUS, &cc1101_bus_settings);
 
-	gpio_write(mod->cs_pin, false);							// select CC1101
-	cc1101_wait_miso(mod);									// wait until MISO goes low
+	gpio_write(config->cs_pin, false);							// select CC1101
+	cc1101_wait_miso(config);									// wait until MISO goes low
 
 	spi_transfer_8(SPI_BUS, regAddr | CC1101_WRITE_BURST);	// send register address
 	for (uint8_t i = 0; i<len; i++) 
 		spi_transfer_8(SPI_BUS, buf[i]);					// send value
 
-	gpio_write(mod->cs_pin, true);							// deselect CC1101
+	gpio_write(config->cs_pin, true);							// deselect CC1101
 	spi_set_settings(SPI_BUS, &old_settings);				// Restore old spi settings	
 }
 
-uint8_t cc1101_read_reg(cc1101_module_t *mod, uint8_t regAddr, uint8_t regType)
+uint8_t cc1101_read_reg(cc1101_driver_config_t *config, uint8_t regAddr, uint8_t regType)
 {
 	// Store current spi settings
 	spi_settings_t old_settings;
 	spi_get_settings(SPI_BUS, &old_settings);
 	spi_set_settings(SPI_BUS, &cc1101_bus_settings);
 
-	gpio_write(mod->cs_pin, false);							// select CC1101
-	cc1101_wait_miso(mod);									// wait until MISO goes low
+	gpio_write(config->cs_pin, false);							// select CC1101
+	cc1101_wait_miso(config);									// wait until MISO goes low
 
 	spi_transfer_8(SPI_BUS, regAddr | regType);				// send register address
 	uint8_t val = spi_transfer_8(SPI_BUS, 0x00);			// read result
 
-	gpio_write(mod->cs_pin, true);							// deselect CC1101
+	gpio_write(config->cs_pin, true);							// deselect CC1101
 	spi_set_settings(SPI_BUS, &old_settings);				// Restore old spi settings	
 
 	return val;
 }
 
-void cc1101_write_reg(cc1101_module_t *mod, uint8_t regAddr, uint8_t val)
+void cc1101_write_reg(cc1101_driver_config_t *config, uint8_t regAddr, uint8_t val)
 {
 	// Store current spi settings
 	spi_settings_t old_settings;
 	spi_get_settings(SPI_BUS, &old_settings);
 	spi_set_settings(SPI_BUS, &cc1101_bus_settings);
 
-	gpio_write(mod->cs_pin, false);							// select CC1101
-	cc1101_wait_miso(mod);									// wait until MISO goes low
+	gpio_write(config->cs_pin, false);							// select CC1101
+	cc1101_wait_miso(config);									// wait until MISO goes low
 
 	spi_transfer_8(SPI_BUS, regAddr);						// send register address
 	spi_transfer_8(SPI_BUS, val);							// send value
 
-	gpio_write(mod->cs_pin, true);							// deselect CC1101
+	gpio_write(config->cs_pin, true);							// deselect CC1101
 	spi_set_settings(SPI_BUS, &old_settings);				// Restore old spi settings	
 }

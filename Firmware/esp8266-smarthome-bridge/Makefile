@@ -25,6 +25,8 @@ PROGRAM = esp8266-smarthome-bridge
 # additional components
 EXTRA_COMPONENTS = \
 	drivers \
-	extras/dht
+	extras/dht \
+	homematic \
+	tado_v2_api
 
 include $(ESP8266_RTOS_SDK_PATH)/common.mk

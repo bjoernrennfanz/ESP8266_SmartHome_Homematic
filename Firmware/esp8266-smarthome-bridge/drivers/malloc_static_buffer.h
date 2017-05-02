@@ -2,7 +2,7 @@
  * malloc_static_buffer.h
  *
  *  Created on: 22.04.2017
- *      Author: Björn Rennfanz <bjoern@fam-rennfanz.de>
+ *      Author: Bjoern Rennfanz <bjoern@fam-rennfanz.de>
  *      License: MIT, see LICENSE file for more details.
  */
 

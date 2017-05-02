@@ -2,7 +2,7 @@
  * ringbuffer.c
  *
  *  Created on: 20.04.2017
- *      Author: Björn Rennfanz <bjoern@fam-rennfanz.de>
+ *      Author: Bjoern Rennfanz <bjoern@fam-rennfanz.de>
  *      License: MIT, see LICENSE file for more details.
  */
  

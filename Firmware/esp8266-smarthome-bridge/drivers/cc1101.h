@@ -153,14 +153,27 @@ typedef struct
 	uint8_t lqi;				//!< Link quality
 
 	uint8_t cs_pin;				//!< GPIO connected to CS/LOAD pin
-} cc1101_module_t;
+
+} cc1101_driver_config_t;
+
+// CC1101 driver struct
+typedef struct
+{
+	void (*set_idle)(cc1101_driver_config_t *config);			// put CC1101 into power-down state
+	uint8_t (*detect_burst)(cc1101_driver_config_t *config);	// detect burst signal, sleep while no signal, otherwise stay awake
+
+	void (*init)(cc1101_driver_config_t *config);											// initialize CC1101
+	uint8_t (*snd_data)(cc1101_driver_config_t *config, uint8_t *buf, uint8_t burst);		// send data packet via RF
+	uint8_t (*rcv_data)(cc1101_driver_config_t *config, uint8_t *buf);						// read data packet from RX FIFO
+
+} cc1101_driver_t;
 
 // CC1101 prototypes
-void cc1101_set_idle(cc1101_module_t *mod);			// put CC1101 into power-down state
-uint8_t cc1101_detect_burst(cc1101_module_t *mod);	// detect burst signal, sleep while no signal, otherwise stay awake
+void cc1101_set_idle(cc1101_driver_config_t *config);			// put CC1101 into power-down state
+uint8_t cc1101_detect_burst(cc1101_driver_config_t *config);	// detect burst signal, sleep while no signal, otherwise stay awake
 
-void cc1101_init(cc1101_module_t *mod);											// initialize CC1101
-uint8_t cc1101_snd_data(cc1101_module_t *mod, uint8_t *buf, uint8_t burst);		// send data packet via RF
-uint8_t cc1101_rcv_data(cc1101_module_t *mod, uint8_t *buf);					// read data packet from RX FIFO
+void cc1101_init(cc1101_driver_config_t *config);											// initialize CC1101
+uint8_t cc1101_snd_data(cc1101_driver_config_t *config, uint8_t *buf, uint8_t burst);		// send data packet via RF
+uint8_t cc1101_rcv_data(cc1101_driver_config_t *config, uint8_t *buf);						// read data packet from RX FIFO
 
 #endif /* CC1101_H_ */
