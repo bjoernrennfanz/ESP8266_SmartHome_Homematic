@@ -41,7 +41,7 @@ protected:
 		uint8_t       ReceiverID[3];				// receiver id, broadcast for 0
 		uint8_t       Type10;						// type of message
 		uint8_t       Type11;						// type of message
-		uint8_t       Payload[MAX_DATA_LEN - 12];// payload
+		uint8_t       Payload[MAX_DATA_LEN - 12];	// payload
 	};
 
 public:
@@ -56,7 +56,7 @@ private:
 	class Homematic *pHomematic;					// pointer to main class for function calls
 
 protected:
-	void Init(Homematic *ptrMain);
+	void Init(Homematic *pHomematic);
 	void Poll(void);
 };
 

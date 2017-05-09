@@ -54,6 +54,15 @@
     <ClInclude Include="homematic\homematic_receiver.h">
       <Filter>Headerdateien\homematic</Filter>
     </ClInclude>
+    <ClInclude Include="homematic\homematic_power.h">
+      <Filter>Headerdateien\homematic</Filter>
+    </ClInclude>
+    <ClInclude Include="homematic\thsensor.h">
+      <Filter>Headerdateien\homematic</Filter>
+    </ClInclude>
+    <ClInclude Include="homematic\homematic_sensor.h">
+      <Filter>Headerdateien\homematic</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dht_poll_task.c">
@@ -82,6 +91,18 @@
     </ClCompile>
     <ClCompile Include="homematic\homematic_receiver.cpp">
       <Filter>Quelldateien\homematic</Filter>
+    </ClCompile>
+    <ClCompile Include="homematic\homematic_power.cpp">
+      <Filter>Quelldateien\homematic</Filter>
+    </ClCompile>
+    <ClCompile Include="homematic\thsensor.cpp">
+      <Filter>Quelldateien\homematic</Filter>
+    </ClCompile>
+    <ClCompile Include="homematic\homematic_sensor.cpp">
+      <Filter>Quelldateien\homematic</Filter>
+    </ClCompile>
+    <ClCompile Include="libc-workarounds.c">
+      <Filter>Quelldateien</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

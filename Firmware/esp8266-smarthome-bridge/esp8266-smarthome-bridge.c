@@ -18,31 +18,40 @@
 #include "task.h"
 
 #include "homematic\homematic.h"
+#include "homematic\thsensor.h"
 #include "drivers\cc1101.h"
+
 #include "dht_poll_task.h"
 
-void dhtProceedValuesTask(void *pvParameters)
+static uint8_t dht11Temperature;
+static uint8_t dht11Humidity; 
+static uint8_t tadoTemperature;
+static uint8_t tadoHumidity;
+
+void MeasureDht11Values()
 {
-	// Create struct for received values
-	struct dht_measurements rx_dht_measurement;
-
-	while(1)
+	// Check if transfer queue was allocated
+	if( dht_transfer_queue != 0 )
 	{
-		// Check if transfer queue was allocated
-		if( dht_transfer_queue != 0 )
-		{
-			// Receive a message on the created dht_rx_queue.
-			if( xQueueReceive(dht_transfer_queue, (void *)&rx_dht_measurement, (TickType_t)0 ) )
-			{
-				printf("DHT11: Humidity: %d%% Temp: %dC\n", rx_dht_measurement.humidity / 10, rx_dht_measurement.temperature / 10);
-			}
-		}
+		struct dht_measurements dht11_measurement;
 
-		vTaskDelay(1000 / portTICK_PERIOD_MS);
+		// Receive a message on the created dht_rx_queue.
+		if( xQueueReceive(dht_transfer_queue, (void *)&dht11_measurement, (TickType_t)0 ) )
+		{
+			dht11Humidity = (uint8_t)(dht11_measurement.humidity / 10);
+			dht11Temperature = (uint8_t)(dht11_measurement.temperature / 10);
+
+			printf("DHT11: Humidity: %d%% Temp: %dC\n", dht11Humidity, dht11Temperature);
+		}
 	}
 }
 
-void cc1101ProceedTask(void *pvParameters)
+void MeasureTadoValues()
+{
+
+}
+
+void homematicProceedTask(void *pvParameters)
 {
 	// Create struct for module config values
 	cc1101_driver_config_t module_config = {
@@ -65,6 +74,15 @@ void cc1101ProceedTask(void *pvParameters)
 	homematic_handle_t homematicInstance = homematic_construct();
 	homematic_init(homematicInstance, &module_driver, &module_config);
 
+	// Initialize virtual TADO sensor
+	thsensor_handle_t tadoThSensor = thsensor_construct();
+	thsensor_init(tadoThSensor, MeasureTadoValues, &tadoTemperature, &tadoHumidity);
+	thsensor_homematic_register(tadoThSensor, 0, 0, homematicInstance);
+
+	thsensor_handle_t dht11ThSensor = thsensor_construct();
+	thsensor_init(dht11ThSensor, MeasureDht11Values, &dht11Temperature, &dht11Humidity);
+	thsensor_homematic_register(dht11ThSensor, 0, 0, homematicInstance);
+
 	while (1)
 	{
 		// Handle homematic communication
@@ -77,7 +95,6 @@ void user_init(void)
     uart_set_baud(0, 115200);
     printf("ESP8266 HW-SDK version: %s\n", sdk_system_get_sdk_version());
 
-    xTaskCreate(dhtProceedValuesTask, "dhtProceedValuesTask", 192, NULL, 2, NULL);
     xTaskCreate(dhtMeasurementTask, "dhtMeasurementTask", 128, NULL, 2, NULL);
-	xTaskCreate(cc1101ProceedTask, "cc1101ProceedTask", 256, NULL, 2, NULL);
+	xTaskCreate(homematicProceedTask, "homematicProceedTask", 256, NULL, 2, NULL);
 }

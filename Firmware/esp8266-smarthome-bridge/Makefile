@@ -19,6 +19,9 @@ CC  := $(XTENSA_TOOLS_ROOT)/xtensa-lx106-elf-gcc
 CXX := $(XTENSA_TOOLS_ROOT)/xtensa-lx106-elf-gcc
 LD  := $(XTENSA_TOOLS_ROOT)/xtensa-lx106-elf-gcc
 
+# Enable C++ 11 support
+# CXXFLAGS += 
+
 # program name
 PROGRAM = esp8266-smarthome-bridge
 

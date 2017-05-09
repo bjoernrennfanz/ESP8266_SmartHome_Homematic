@@ -6,13 +6,22 @@
 *      License: MIT, see LICENSE file for more details.
 */
 
+#define HOMEMATIC_DEBUG
+
+#ifdef HOMEMATIC_DEBUG
+#	include <stdio.h>
+#	define debug(fmt, ...) printf("%s: " fmt "\n", "HOMEMATIC", ## __VA_ARGS__)
+#else
+#	define debug(fmt, ...)
+#endif
+
 #include "homematic.h"
-#include "stdio.h"
 
 Homematic::Homematic()
 	: configTimer()
 	, pairingTimer()
 	, homematicReceiver()
+	, homematicPower()
 	, IsPairingActive(false)
 {
 }
@@ -28,6 +37,7 @@ void Homematic::Init(cc1101_driver_t *cc1101_driver, cc1101_driver_config_t *cc1
 
 	// Initialize sub components
 	this->homematicReceiver.Init(this);
+	this->homematicPower.Init(this);
 }
 
 void Homematic::Poll()
@@ -35,43 +45,22 @@ void Homematic::Poll()
 	if (pairingTimer.IsDone())
 	{
 		pairingTimer.Set(5000);
-		printf("Paring timer reset...\n");
+		debug("%s", "Paring timer reset");
 	}
 	
-	tmpCCBurst = cc1101_driver->detect_burst(cc1101_config);
-	if ((tmpCCBurst) && (!chkCCBurst))
-	{
-		// burst detected for the first time
-		chkCCBurst = 1;	// set the flag
-	}
-	else
-	{
-		if ((tmpCCBurst) && (chkCCBurst))
-		{		// burst detected for the second time
-			chkCCBurst = 0;	// reset the flag
-			printf("CC1101: Burst detected!\n");
-		}
-		else
-		{
-			if ((!tmpCCBurst) && (chkCCBurst))
-			{		// secondary test was negative, reset the flag
-				chkCCBurst = 0;	// reset the flag	
-			}
-		}
-	}
 
-	if (!chkCCBurst) vTaskDelay(128 / portTICK_PERIOD_MS);
-	if (chkCCBurst) vTaskDelay(32 / portTICK_PERIOD_MS);
 
 	uint8_t num = cc1101_driver->rcv_data(cc1101_config, homematicReceiver.Buffer);
 	if (num)
 	{
 		// this->homematicReceiver.MessageBody.Length
-		printf("CC1101: %d Bytes read, CRC %s, RSSI %d, Link quality %d\n", num, this->cc1101_config->crc_ok ? "Ok" : "NOk", this->cc1101_config->rssi, this->cc1101_config->lqi);
+		debug("%d Bytes read, CRC %s, RSSI %d, Link quality %d", num, this->cc1101_config->crc_ok ? "Ok" : "NOk", this->cc1101_config->rssi, this->cc1101_config->lqi);
 	}
 
 	// handle send and receive buffer
 	if (homematicReceiver.HasData) homematicReceiver.Poll();
+
+	homematicPower.Poll();
 }
 
 homematic_handle_t homematic_construct()

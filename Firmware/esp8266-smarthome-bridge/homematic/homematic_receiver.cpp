@@ -6,15 +6,23 @@
 *      License: MIT, see LICENSE file for more details.
 */
 
-#include <stdio.h>
+#define HOMEMATIC_RECEIVER_DEBUG
+
+#ifdef HOMEMATIC_RECEIVER_DEBUG
+#	include <stdio.h>
+#	define debug(fmt, ...) printf("%s: " fmt "\n", "RECEIVER", ## __VA_ARGS__)
+#else
+#	define debug(fmt, ...)
+#endif
+
 #include <string.h>
 
 #include "homematic_receiver.h"
 
-void HomematicReceiver::Init(Homematic *ptrHomematic)
+void HomematicReceiver::Init(Homematic *pHomematic)
 {
 	this->Buffer = (uint8_t*)&this->MessageBody;
-	this->pHomematic = ptrHomematic;
+	this->pHomematic = pHomematic;
 }
 
 void HomematicReceiver::Poll()
@@ -35,7 +43,7 @@ void HomematicReceiver::Poll()
 	if ((this->MessageBody.Flags.RPTED) && (lastReadCount == this->MessageBody.Length)) 
 	{	// check if message was already received
 
-		printf("RECV: repeated message\n");
+		debug("%s", "Repeated message, droping.");
 		
 		// clear receive buffer
 		this->MessageBody.Length = 0;

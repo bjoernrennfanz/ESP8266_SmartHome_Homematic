@@ -14,10 +14,13 @@
 #ifdef __cplusplus
 
 #include "homematic_receiver.h"
+#include "homematic_power.h"
 #include "wait_timer.h"
   
 class Homematic
 {
+	friend HomematicPower;
+
 public:
 	Homematic();
 
@@ -46,8 +49,7 @@ private:
 
 	// Homematic modules
 	HomematicReceiver homematicReceiver;
-	uint8_t tmpCCBurst, chkCCBurst;
-	uint8_t receiveBuffer[CC1101_DATA_LEN];
+	HomematicPower homematicPower;
  
 	// Indication for paring
 	bool IsPairingActive;
@@ -100,10 +102,15 @@ typedef void *homematic_handle_t;
 extern "C"
 {
 #endif
+
 homematic_handle_t homematic_construct();
 void homematic_destroy(homematic_handle_t handle);
 void homematic_poll(homematic_handle_t handle);
 void homematic_init(homematic_handle_t handle, cc1101_driver_t *cc1101_driver, cc1101_driver_config_t *cc1101_config);
+
+// Type definition event callback
+typedef void(*homematic_event_callback_t)(uint8_t byte3, uint8_t byte10, uint8_t byte11, uint8_t *data, uint8_t len);
+
 #ifdef __cplusplus  
 } // extern "C"  
 #endif

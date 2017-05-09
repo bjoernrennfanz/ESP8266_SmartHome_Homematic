@@ -24,7 +24,10 @@
     <ClInclude Include="drivers\malloc_static_buffer.h" />
     <ClInclude Include="drivers\ringbuffer.h" />
     <ClInclude Include="homematic\homematic.h" />
+    <ClInclude Include="homematic\homematic_power.h" />
     <ClInclude Include="homematic\homematic_receiver.h" />
+    <ClInclude Include="homematic\homematic_sensor.h" />
+    <ClInclude Include="homematic\thsensor.h" />
     <ClInclude Include="homematic\wait_timer.h" />
   </ItemGroup>
   <ItemGroup>
@@ -34,8 +37,12 @@
     <ClCompile Include="drivers\ringbuffer.c" />
     <ClCompile Include="esp8266-smarthome-bridge.c" />
     <ClCompile Include="homematic\homematic.cpp" />
+    <ClCompile Include="homematic\homematic_power.cpp" />
     <ClCompile Include="homematic\homematic_receiver.cpp" />
+    <ClCompile Include="homematic\homematic_sensor.cpp" />
+    <ClCompile Include="homematic\thsensor.cpp" />
     <ClCompile Include="homematic\wait_timer.cpp" />
+    <ClCompile Include="libc-workarounds.c" />
     <ClCompile Include="tado_v2_api\godaddyca_cert.c" />
   </ItemGroup>
   <ItemGroup>
